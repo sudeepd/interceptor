@@ -4,6 +4,8 @@ import json
 import redis 
 import boto3
 from mitmproxy import http
+from mitmproxy import ctx
+
 
 REDIS_HOST=os.environ.get("REDIS_HOST","localhost")
 REDIS_PORT=os.environ.get("REDIS_PORT","6379")
@@ -64,22 +66,6 @@ def create_response_preamble(response : mitmproxy.http.Response):
     res["timestamp_end"] = response.timestamp_end
     res["http_version"] = response.http_version
     return json.dumps(res)
-
-
-### request header should contain proxy auth
-def authenticate(flow):
-    return False
-
-def request(flow):
-    if (authenticate(flow) is False):
-        flow.response = http.Response.make(407,
-            "<html><body><h1>Proxy Authentication Required</h1></body></html>",
-            {
-                "content-type":"text/html",
-                "proxy-authenticate" : "Basic"
-            }
-        )
-        
 
 def response(flow):
     req = {}
